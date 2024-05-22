@@ -1,37 +1,16 @@
-import { useContext, useState } from "react";
-import { userContext } from "../App";
+import React, { useState } from "react";
+import {
+  handleSubmit128p,
+  handleSubmit256p,
+  handleSubmit320p,
+  handleSubmit64p,
+} from "./utils/codeSnippets";
 
-function Music() {
-  const songs = useContext(userContext);
-  const [buttonStates, setButtonStates] = useState([]);
-
-  function changeButton(index) {
-    const newButtonStates = [...buttonStates];
-    newButtonStates[index] = true;
-    setButtonStates(newButtonStates);
-  }
-
-  function handleSubmit320p(videoId) {
-    window.location.href = `https://yt-songs-download.onrender.com/download-320kb/${videoId}`;
-  }
-
-  function handleSubmit256p(videoId) {
-    window.location.href = `https://yt-songs-download.onrender.com/download-256kb/${videoId}`;
-  }
-
-  function handleSubmit128p(videoId) {
-    window.location.href = `https://yt-songs-download.onrender.com/download-128kb/${videoId}`;
-  }
-
-  function handleSubmit64p(videoId) {
-    window.location.href = `https://yt-songs-download.onrender.com/download-64kb/${videoId}`;
-  }
+const Song = ({ song }) => {
+  const [isClicked, setIsClicked] = useState(false);
 
   return (
-    <div>
-      {songs && songs.length > 0 ? (
-        songs.map((song, index) => (
-          <div key={index} className="Music h-full w-full flex p-2 max-sm:w-full max-sm:inline-block">
+    <div className="Music h-full w-full flex p-2 max-sm:w-full max-sm:inline-block">
             <div className="image-container h-44 w-1/4 m-1 max-sm:w-full">
               <img className="image h-full w-full object-cover rounded-xl max-sm:w-full" src={song.image} alt={song.title} />
             </div>
@@ -49,10 +28,10 @@ function Music() {
               </div>
               <p className="truncate w-5/6 text-black text-sm mt-1 max-sm:mr-4">{song.description}</p>
               <div className="max-sm:flex max-sm:justify-center ">
-                {!buttonStates[index] ? (
+                {!isClicked ? (
                   <button
                     className="button bg-black rounded-md p-2.5 mt-2 text-white font-semibold hover:bg-teal-400 hover:text-black"
-                    onClick={() => changeButton(index)}
+                    onClick={() => setIsClicked(true)}
                   >
                     <i className="fa-solid fa-music mr-2"></i>Download Mp3
                   </button>
@@ -67,12 +46,7 @@ function Music() {
               </div>
             </div>
           </div>
-        ))
-      ) : (
-        <h1 className="text-2xl font-bold flex justify-center mt-52 max-sm:ml-0 max-sm:p-0 max-sm:flex max-sm:justify-center max-sm:mt-48">Songs Are Not Found</h1>
-      )}
-    </div>
   );
-}
+};
 
-export default Music;
+export default Song;

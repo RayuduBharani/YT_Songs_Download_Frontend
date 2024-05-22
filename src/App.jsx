@@ -1,76 +1,84 @@
-import { createContext, useState, useEffect } from 'react';
-import './App.css';
-import Music from './components/Music';
+import React, { useEffect, useState } from "react";
+import Loading from "./components/Loading";
+import Song from "./components/Song";
 
-export const userContext = createContext();
-
-function App() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [search, setSearch] = useState('');
+const App = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [query, setQuery] = useState("");
   const [songs, setSongs] = useState([]);
 
-  useEffect(() => {
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 5000);
-  });
+  const handleInput = (event) => {
+    setQuery(event.target.value);
+  };
 
-  function handleInput(event) {
-    setSearch(event.target.value);
-  }
-
-  function submitButton(event) {
-    setIsLoading(true)
-    // console.log(search);
-    event.preventDefault();
-    if (search) {
-      fetch(`https://yt-songs-download.onrender.com/home/${search}`, {
-        method: "GET",
+  const fetchData = () => {
+    if (!query) return;
+    setIsLoading(true);
+    fetch(`https://yt-songs-download.onrender.com/home/${query}`, {
+      method: "GET",
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setSongs(data);
+        console.log(songs);
+        setIsLoading(false);
       })
-        .then(response => response.json())
-        .then(data => {
-          setSongs(data);
-          console.log(data)
-        })
-        .catch(err => {
-          console.log(err);
-        });
-    } else {
-      console.log({ message: "First Search a song" });
-    }
-  }
+      .catch((err) => {
+        console.error(err);
+        setIsLoading(false);
+      });
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    fetchData();
+  };
 
   return (
-    <userContext.Provider value={songs}>
-      <div className='div flex justify-center items-center w-full h-screen bg-gray-200'>
-        <div className='main w-10/12 h-[90%] bg-white rounded-xl overflow-hidden max-md:w-11/12 max-sm:w-11/12 max-sm:p-2'>
-          <form className='search-div w-full h-16 mt-2 flex justify-center items-center max-sm:flex-wrap max-sm:gap-1'>
-            <div className='icon w-12 h-[76%] bg-neutral-100 mr-2 rounded-lg flex justify-center items-center '>
-              <i className="fa-brands fa-spotify text-4xl text-black cursor-pointer"></i>
-            </div>
-            <input type="text" onChange={handleInput} name='input' className='input-box w-4/5 h-[75%] bg-neutral-100 rounded-lg outline-none indent-4 text-black max-lg:w-[70%] max-md:w-[70%] max-sm:w-4/5'
-              placeholder='Search or paste the URL for your Favourite Music'/>
-            <button onClick={submitButton} className="btn bg-black text-white border-none text-base ml-5 hover:btn-accent hover:text-white max-sm:mr-6 max-sm:mt-1">
-                Search
-            </button>
-          </form>
-
-          <div className='music-component w-full h-full max-sm:mt-12 max-sm:w-full'>
-            {isLoading ? (
-              <div className="flex justify-center mt-48">
-                <span className="loading loading-bars loading-xs text-orange-500"></span>
-                <span className="loading loading-bars loading-sm text-teal-500"></span>
-                <span className="loading loading-bars loading-md text-sky-500"></span>
-                <span className="loading loading-bars loading-lg text-fuchsia-600"></span>
-              </div>
-            ) : (
-              <Music />
-            )}
+    <div className="flex justify-center items-center w-full h-screen bg-gray-200">
+      <div className="w-10/12 h-[90%] bg-white rounded-xl overflow-hidden max-md:w-11/12 max-sm:w-11/12 max-sm:p-2">
+        <form
+          onSubmit={handleSubmit}
+          className="w-full h-16 mt-2 flex justify-center items-center max-sm:flex-wrap max-sm:gap-1"
+        >
+          <div className="icon w-12 bg-neutral-100 mr-2 rounded-lg flex justify-center items-center ">
+            <i className="fab fa-spotify text-4xl text-black cursor-pointer"></i>
           </div>
+          <input
+            placeholder="Search or Paste the URL for your Favourite Music"
+            type="text"
+            onChange={handleInput}
+            value={query}
+            name="input"
+            required
+            className="input-box w-4/5 h-[75%] bg-neutral-100 rounded-lg outline-none indent-4 text-black max-lg:w-[70%] max-md:w-[70%] max-sm:w-4/5"
+          />
+          <button
+            type="submit"
+            className="btn bg-black text-white border-none text-base ml-5 hover:btn-accent hover:text-white max-sm:mr-6 max-sm:mt-1"
+          >
+            Search
+          </button>
+        </form>
+
+        <div className="w-full h-full overflow-y-scroll pb-16 max-sm:mt-12 max-sm:w-full">
+          {isLoading ? (
+            <Loading />
+          ) : songs && songs.length > 0 ? (
+            <div className="">
+              {songs.map((song, index) => (
+                <Song key={index} song={song} />
+              ))}
+            </div>
+          ) : (
+            <div className="flex items-center justify-center w-full h-[80%]">
+              <h1 className="font-semibold text-xl">Songs are not found.</h1>
+            </div>
+          )}
         </div>
       </div>
-    </userContext.Provider>
+    </div>
   );
-}
+};
 
 export default App;
